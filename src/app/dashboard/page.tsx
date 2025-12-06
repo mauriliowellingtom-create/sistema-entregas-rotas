@@ -31,7 +31,12 @@ export default function DashboardPage() {
         .eq('id', user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar role do usuário:', error);
+        router.push('/login');
+        return;
+      }
+      
       setUserRole(data.role);
     } catch (error) {
       console.error('Erro ao verificar autenticação:', error);
@@ -43,7 +48,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );

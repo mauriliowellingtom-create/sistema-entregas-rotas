@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +11,6 @@ import { Truck, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,25 +25,23 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      // Verificar role do usuário
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (userError) throw userError;
-
-      if (userData.role !== role) {
-        toast.error('Acesso negado para este tipo de usuário');
-        await supabase.auth.signOut();
-        return;
-      }
-
+      // Login bem-sucedido
       toast.success('Login realizado com sucesso!');
-      router.push('/dashboard');
+      
+      // Limpa os campos
+      setEmail('');
+      setPassword('');
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao fazer login');
+      console.error('Erro no login:', error);
+      
+      // Mensagens de erro mais amigáveis
+      if (error.message?.includes('Invalid login credentials')) {
+        toast.error('Email ou senha incorretos');
+      } else if (error.message?.includes('Email not confirmed')) {
+        toast.error('Por favor, confirme seu email antes de fazer login');
+      } else {
+        toast.error('Erro ao fazer login. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -152,6 +148,18 @@ export default function LoginPage() {
               </form>
             </TabsContent>
           </Tabs>
+
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">
+              📋 Instruções para configurar:
+            </p>
+            <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
+              <li>Acesse o dashboard do Supabase</li>
+              <li>Vá em Authentication → Users</li>
+              <li>Crie usuários com email e senha</li>
+              <li>Use as credenciais criadas para fazer login</li>
+            </ol>
+          </div>
         </CardContent>
       </Card>
     </div>
